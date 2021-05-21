@@ -30,7 +30,6 @@ class MessageField extends React.Component {
     }
 
     handleClick = () => {
-        //this.setState({ messages: [...this.state.messages, { content: this.ref.current.value, date: new Date().toUTCString(), sender: "User", flag: 0 }] });
         this.saveMessage(this.ref.current.value, "User", 0);
     }
 
