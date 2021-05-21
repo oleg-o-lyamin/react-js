@@ -1,0 +1,16 @@
+span { 
+    margin: 10px;
+}
+
+.user {
+    font-size: 12px;
+}
+
+.date {
+    color: gray;
+    font-size: 12px;
+}
+
+.message {
+    margin: 20px;
+}

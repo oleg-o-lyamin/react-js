@@ -1,41 +1,56 @@
 import React from "react"
 import ReactDOM from "react-dom"
+import styles from "./index.module.css"
 
-const messageStack = [];
-
-const Message = ({ message }) => {
-    return (
-        <React.Fragment>
-            <h1>{message}</h1>
-        </React.Fragment>
-    )
+class Message extends React.Component {
+    render() {
+        return <div className={styles.message}>
+            <div>
+                <span>{this.props.message.content}</span>
+            </div>
+            <div>
+                <span className={styles.user}>by {this.props.message.sender}</span>
+                <span className={styles.date}>on {this.props.message.date}</span>
+            </div>
+        </div>
+    }
 }
 
-const MessageField = ({ messages }) => {
-    return messages.map((message, index) => (
-        <Message message={message} key={index} />
-    ))
+class MessageField extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            messages: [],
+        };
+        this.ref = React.createRef();
+    }
+
+    saveMessage = (msg, sender, flag) => {
+        this.setState({ messages: [...this.state.messages, { content: msg, date: new Date().toUTCString(), sender: sender, flag: flag }] });
+    }
+
+    handleClick = () => {
+        //this.setState({ messages: [...this.state.messages, { content: this.ref.current.value, date: new Date().toUTCString(), sender: "User", flag: 0 }] });
+        this.saveMessage(this.ref.current.value, "User", 0);
+    }
+
+    render() {
+        const messages = this.state.messages.map((message, index) => (<Message key={index} message={message} />));
+
+        return <div>
+            {messages}
+            <input type="text" ref={this.ref} />
+            <button onClick={this.handleClick}>Send</button>
+        </div>
+    }
+
+    componentDidUpdate() {
+        if (this.state.messages[this.state.messages.length - 1].flag == 0) {
+            setTimeout(() => {
+                this.saveMessage("Received!", "Bot", 1);
+            }, 1000);
+        }
+    }
 }
 
-const InputText = () => {
-    const myRef = React.createRef();
-
-    function handleClick(e) {
-        e.preventDefault();
-        messageStack.push(myRef.current.value);
-        reRender();
-    };
-
-    return (
-        <React.Fragment>
-            <input type="text" ref={myRef} />
-            <a href="#" onClick={handleClick}>Send</a>
-        </React.Fragment>
-    );
-}
-
-const reRender = () => {
-    ReactDOM.render(<React.Fragment><MessageField messages={messageStack} /><InputText /></React.Fragment>, document.getElementById("root"))
-}
-
-reRender();
+ReactDOM.render(<MessageField />, document.getElementById("root"))
