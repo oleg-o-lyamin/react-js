@@ -14,3 +14,16 @@ span {
 .message {
     margin: 20px;
 }
+
+.messageField {
+    display: flex;
+    flex-direction: column;
+}
+
+.right {
+    align-self: flex-end;
+}
+
+.left {
+    align-self: flex-start;
+}
