@@ -64,7 +64,7 @@ class MessageField extends React.Component {
         const { chatId } = this.props;
         const messages = (this.state.messages[chatId] == undefined) ? [] : this.state.messages[chatId].map((message, index) => (<Message key={index} message={message} />));
 
-        return <div style={{ width: "70%" }}>
+        return <div style={{ width: "70%", padding: "20px" }}>
             <div id="scrollDiv" className={styles.messageField} style={{ width: "100%", height: "100%", overflow: "auto" }}>
                 {messages}
             </div>
@@ -112,7 +112,7 @@ class MessageField extends React.Component {
 
 class Header extends React.Component {
     render() {
-        return <h1>Чат</h1>
+        return <h1 style={{ padding: "20px" }}>Чат</h1>
     }
 }
 
@@ -126,17 +126,19 @@ class ChatList extends React.Component {
     }
 
     render() {
-        return <div style={{ width: "30%" }}>
-            {
-                this.state.chats.map((chat, index) => (
-                    <ListItem key={index}>
-                        <Link to={`/chats/${index}`}>
-                            <ListItemText primary={chat} />
-                        </Link>
-                    </ListItem>
-                ))
-            }
-            <InputLabel htmlFor="chatLabel">Введите название чата...</InputLabel>
+        return <div style={{ width: "30%", padding: "20px" }}>
+            <div style={{ height: "100%" }}>
+                {
+                    this.state.chats.map((chat, index) => (
+                        <ListItem key={index} style={{ }}>
+                            <Link to={`/chats/${index}`}>
+                                <ListItemText primary={chat} />
+                            </Link>
+                        </ListItem>
+                    ))
+                }
+            </div>
+            <InputLabel htmlFor="chatLabel">Введите название нового чата...</InputLabel>
             <Input
                 id="chatLabel"
                 value={this.state.value}
@@ -177,7 +179,7 @@ class Layout extends React.Component {
                         }
                     } />
                     <Route>
-                        <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div style={{ width: "70%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
                             <h1>Выберите чат.</h1>
                         </div>
                     </Route>
