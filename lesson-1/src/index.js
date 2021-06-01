@@ -1,9 +1,76 @@
 import React from "react"
 import ReactDOM from "react-dom"
 import styles from "./index.module.css"
-import { Input, InputAdornment, List, ListItem, ListItemText, TextField, InputLabel } from "@material-ui/core"
-import { Send, Add } from "@material-ui/icons"
-import { BrowserRouter, Switch, Route, Link, useParams, withRouter } from "react-router-dom";
+import { Input, InputAdornment, List, ListItem, ListItemText, TextField, InputLabel, requirePropFactory, ListItemSecondaryAction, IconButton } from "@material-ui/core"
+import { Send, Add, Delete } from "@material-ui/icons"
+import { BrowserRouter, Switch, Route, Link, useParams, withRouter, Redirect } from "react-router-dom";
+import { createStore, combineReducers } from "redux";
+import { Provider, connect } from "react-redux";
+
+// <REDUX>
+
+const ADDCHAT = "@chat/add";
+const ADDMESSAGE = "@message/add";
+const DELETECHAT = "@chat/delete"
+
+const addChat = (chat) => {
+    return { type: ADDCHAT, payload: chat };
+}
+
+const addMessage = (chatId, content) => {
+    return { type: ADDMESSAGE, payload: { id: chatId, message: content } };
+}
+
+const deleteChat = (chatId) => {
+    return { type: DELETECHAT, payload: chatId };
+}
+
+const chatsInitialState = {
+    chats: [{ id: 100, name: "Room #1", messages: [] }, { id: 200, name: "Room #2", messages: [] }],
+}
+
+function chatReducer(state = chatsInitialState, action) {
+    switch (action.type) {
+        case ADDCHAT:
+            return {
+                ...state,
+                chats: [...state.chats, { id: Math.floor(Math.random() * 1000000), name: action.payload, messages: [] }]
+            };
+        case ADDMESSAGE:
+            const index = state.chats.findIndex(chat => chat.id == action.payload.id);
+
+            return {
+                ...state,
+                chats: [
+                    ...state.chats.slice(0, index), { ...state.chats[index], messages: [...state.chats[index].messages, action.payload.message] }, ...state.chats.slice(index + 1)
+                ]
+            };
+        case DELETECHAT:
+            return {
+                ...state,
+                chats: [
+                    ...state.chats.filter(chat => chat.id != action.payload)
+                ]
+            };
+        default:
+            return state;
+    }
+}
+
+const reducers = combineReducers({ chatReducer });
+
+const store = createStore(reducers, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
+
+const mapStateToProps = (state) => ({ chats: state.chatReducer.chats });
+const mapDispatchToProps = (dispatch) => {
+    return {
+        addChat: (chat) => dispatch(addChat(chat)),
+        addMessage: (chatId, content) => dispatch(addMessage(chatId, content)),
+        deleteChat: (chatId) => dispatch(deleteChat(chatId)),
+    }
+};
+
+// </REDUX>
 
 class Message extends React.Component {
     render() {
@@ -25,7 +92,6 @@ class MessageField extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            messages: {},
             value: "",
             updating: false,
         };
@@ -33,18 +99,7 @@ class MessageField extends React.Component {
     }
 
     saveMessage = (chatId, msg, sender, flag) => {
-        if (this.state.messages[chatId] == undefined) this.state.messages[chatId] = [];
-        this.state.messages[chatId] = [...this.state.messages[chatId], { content: msg, date: new Date().toUTCString(), sender: sender, flag: flag }];
-
-        this.setState(
-            { 
-                messages: this.state.messages,
-            },
-            () => {
-                const obj = document.getElementById("scrollDiv");
-                obj.scrollTop = obj.scrollHeight;
-            }
-        );
+        this.props.addMessage(chatId, { content: msg, date: new Date().toUTCString(), sender: sender, flag: flag });
     }
 
     handleClick = () => {
@@ -62,7 +117,7 @@ class MessageField extends React.Component {
 
     render() {
         const { chatId } = this.props;
-        const messages = (this.state.messages[chatId] == undefined) ? [] : this.state.messages[chatId].map((message, index) => (<Message key={index} message={message} />));
+        const messages = this.props.chats.find(chat => chat.id == chatId).messages.map((message, index) => (<Message key={index} message={message} />));
 
         return <div style={{ width: "70%", padding: "20px" }}>
             <div id="scrollDiv" className={styles.messageField} style={{ width: "100%", height: "100%", overflow: "auto" }}>
@@ -89,23 +144,22 @@ class MessageField extends React.Component {
         </div>
     }
 
-    componentDidUpdate(prevProps) {
+    componentDidUpdate() {
         const obj = document.getElementById("scrollDiv");
         obj.scrollTop = obj.scrollHeight;
         this.input.current.focus();
 
-        const {chatId} = this.props;
+        const { chatId } = this.props;
 
-        if (!this.state.updating && this.state.messages[chatId] != undefined &&
-            this.state.messages[chatId].length > 0 &&
-            this.state.messages[chatId][this.state.messages[chatId].length - 1].flag == 0) 
-        {
-            this.state.updating = true;
-            const chatId = this.props.chatId;
-            setTimeout(() => {
-                this.saveMessage(chatId, "Received!", "Bot", 1);
-                this.state.updating = false;
-            }, 1000);
+        if (!this.state.updating) {
+            const chat = this.props.chats.find(c => c.id == chatId);
+            if (chat.messages.length > 0 && chat.messages[chat.messages.length - 1].flag == 0) {
+                this.state.updating = true;
+                setTimeout(() => {
+                    this.saveMessage(chatId, "Received!", "Bot", 1);
+                    this.state.updating = false;
+                }, 1000);
+            }
         }
     }
 }
@@ -120,7 +174,6 @@ class ChatList extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            chats: ["Chat Room #1", "Chat Room #2"],
             value: "",
         }
     }
@@ -129,11 +182,16 @@ class ChatList extends React.Component {
         return <div style={{ width: "30%", padding: "20px" }}>
             <div style={{ height: "100%" }}>
                 {
-                    this.state.chats.map((chat, index) => (
-                        <ListItem key={index} style={{ }}>
-                            <Link to={`/chats/${index}`}>
-                                <ListItemText primary={chat} />
+                    this.props.chats.map((chat, index) => (
+                        <ListItem key={index} style={{}} ContainerComponent="div">
+                            <Link to={`/chats/${chat.id}`}>
+                                <ListItemText primary={chat.name} />
                             </Link>
+                            <ListItemSecondaryAction>
+                                <IconButton onClick={() => { this.delete(chat.id) }}>
+                                    <Delete />
+                                </IconButton>
+                            </ListItemSecondaryAction>
                         </ListItem>
                     ))
                 }
@@ -146,22 +204,27 @@ class ChatList extends React.Component {
                 onChange={this.handleChange}
                 endAdornment={
                     <InputAdornment>
-                        <Add onClick={this.handleClick} />
+                        <Add onClick={this.add} />
                     </InputAdornment>
                 }
             />
-        </div>
-    }   
+        </div >
+    }
 
     handleChange = ({ target }) => {
         this.setState({ value: target.value });
     }
 
-    handleClick = () => {
+    add = () => {
         if (this.state.value != "") {
-            this.setState({ chats: [...this.state.chats, this.state.value] });
+            this.props.addChat(this.state.value);
             this.state.value = "";
         }
+    }
+
+    delete = (id) => {
+        this.props.deleteChat(id);
+        if (this.props.chatId == id) this.props.history.push('/index');
     }
 }
 
@@ -170,15 +233,15 @@ class Layout extends React.Component {
         return <div>
             <Header />
             <div style={{ display: "flex", height: "700px" }}>
-                <ChatList />
                 <Switch>
                     <Route path="/chats/:chatId" component={
                         () => {
                             const { chatId } = useParams();
-                            return <MessageField chatId={chatId} />;
+                            return <React.Fragment><ChatListContainer chatId={chatId} /><MessageFieldContainer chatId={chatId} /></React.Fragment>;
                         }
                     } />
                     <Route>
+                        <ChatListContainer chatId="-1" />
                         <div style={{ width: "70%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
                             <h1>Выберите чат.</h1>
                         </div>
@@ -189,4 +252,7 @@ class Layout extends React.Component {
     }
 }
 
-ReactDOM.render(<BrowserRouter><Layout /></BrowserRouter>, document.getElementById("root"))
+const ChatListContainer = withRouter(connect(mapStateToProps, mapDispatchToProps)(ChatList));
+const MessageFieldContainer = connect(mapStateToProps, mapDispatchToProps)(MessageField);
+
+ReactDOM.render(<BrowserRouter><Provider store={store}><Layout /></Provider></BrowserRouter>, document.getElementById("root"))
