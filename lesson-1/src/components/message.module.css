@@ -1,3 +1,12 @@
+
+.right {
+    align-self: flex-end;
+}
+
+.left {
+    align-self: flex-start;
+}
+
 span { 
     margin: 10px;
 }
@@ -18,12 +27,4 @@ span {
 .messageField {
     display: flex;
     flex-direction: column;
-}
-
-.right {
-    align-self: flex-end;
-}
-
-.left {
-    align-self: flex-start;
 }
