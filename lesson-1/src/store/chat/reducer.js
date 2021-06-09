@@ -2,7 +2,8 @@
 import { ADDCHAT, ADDMESSAGE, DELETECHAT, DELETEMESSAGE } from "./types";
 
 const chatsInitialState = {
-    chats: [{ id: 100, name: "Room #1", messages: [] }, { id: 200, name: "Room #2", messages: [] }],
+    //chats: [{ id: 100, name: "Room #1", messages: [] }, { id: 200, name: "Room #2", messages: [] }],
+    chats: [],
 }
 
 export function chatReducer(state = chatsInitialState, action) {
