@@ -1,18 +1,18 @@
 
-import { ADDCHAT, ADDMESSAGE, DELETECHAT, DELETEMESSAGE }  from "./types";
+import { ADD_CHAT, ADD_MESSAGE, DELETE_CHAT, DELETE_MESSAGE } from "./types";
 
 export const addChat = (chat) => {
-    return { type: ADDCHAT, payload: chat };
+    return { type: ADD_CHAT, payload: chat };
 }
 
 export const addMessage = (chatId, content) => {
-    return { type: ADDMESSAGE, payload: { id: chatId, message: content } };
+    return { type: ADD_MESSAGE, payload: { id: chatId, message: content } };
 }
 
 export const deleteChat = (chatId) => {
-    return { type: DELETECHAT, payload: chatId };
+    return { type: DELETE_CHAT, payload: chatId };
 }
 
 export const deleteMessage = (chatId, messageIndex) => {
-    return { type: DELETEMESSAGE, payload: { chatId, messageIndex } };
+    return { type: DELETE_MESSAGE, payload: { chatId, messageIndex } };
 }

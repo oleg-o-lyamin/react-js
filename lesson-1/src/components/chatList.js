@@ -11,11 +11,14 @@ export class ChatList extends React.Component {
         this.state = {
             value: "",
             error: false,
+            isLoading: false,
         }
     }
 
     render() {
-        if (!this.state.error)
+        if (this.state.isLoading)
+            return <div><h3>Loading...</h3></div>
+        else if (!this.state.error)
             return <div style={{ width: "30%", padding: "20px" }}>
                 <div style={{ height: "100%" }}>
                     {
@@ -56,6 +59,7 @@ export class ChatList extends React.Component {
     loadChats = () => {
         if (this.props.chats.length == 0) {
             this.setState({ error: false });
+            this.setState({ isLoading: true });
             fetch(API_URL).
                 then(res => res.json()).
                 then(result => {
@@ -65,7 +69,8 @@ export class ChatList extends React.Component {
                         if (count == 3) break;
                     }
                 }).
-                catch(err => { console.log(err); this.setState({ error: true }); });
+                catch(err => { console.log(err); this.setState({ error: true }); }).
+                finally(() => this.setState({ isLoading: false }));
         }
     }
 
@@ -80,7 +85,7 @@ export class ChatList extends React.Component {
     add = () => {
         if (this.state.value != "") {
             this.props.addChat(this.state.value);
-            this.state.value = "";
+            this.setState({ value: "" });
         }
     }
 

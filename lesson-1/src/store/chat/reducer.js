@@ -1,19 +1,18 @@
 
-import { ADDCHAT, ADDMESSAGE, DELETECHAT, DELETEMESSAGE } from "./types";
+import { ADD_CHAT, ADD_MESSAGE, DELETE_CHAT, DELETE_MESSAGE } from "./types";
 
 const chatsInitialState = {
-    //chats: [{ id: 100, name: "Room #1", messages: [] }, { id: 200, name: "Room #2", messages: [] }],
     chats: [],
 }
 
 export function chatReducer(state = chatsInitialState, action) {
     switch (action.type) {
-        case ADDCHAT:
+        case ADD_CHAT:
             return {
                 ...state,
                 chats: [...state.chats, { id: Math.floor(Math.random() * 1000000), name: action.payload, messages: [] }]
             };
-        case ADDMESSAGE:
+        case ADD_MESSAGE:
             const index = state.chats.findIndex(chat => chat.id == action.payload.id);
 
             return {
@@ -22,14 +21,14 @@ export function chatReducer(state = chatsInitialState, action) {
                     ...state.chats.slice(0, index), { ...state.chats[index], messages: [...state.chats[index].messages, action.payload.message] }, ...state.chats.slice(index + 1)
                 ]
             };
-        case DELETECHAT:
+        case DELETE_CHAT:
             return {
                 ...state,
                 chats: [
                     ...state.chats.filter(chat => chat.id != action.payload)
                 ]
             };
-        case DELETEMESSAGE:
+        case DELETE_MESSAGE:
             const { chatId, messageIndex } = action.payload;
             const chatIndex = state.chats.findIndex(chat => chat.id == chatId);
 

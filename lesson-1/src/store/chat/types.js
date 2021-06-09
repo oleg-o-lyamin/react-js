@@ -1,4 +1,4 @@
-export const ADDCHAT = "@chat/add";
-export const ADDMESSAGE = "@message/add";
-export const DELETECHAT = "@chat/delete"
-export const DELETEMESSAGE = "@message/delete"
+export const ADD_CHAT = "@chat/add";
+export const ADD_MESSAGE = "@message/add";
+export const DELETE_CHAT = "@chat/delete"
+export const DELETE_MESSAGE = "@message/delete"
