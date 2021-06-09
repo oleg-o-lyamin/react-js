@@ -54,17 +54,19 @@ export class ChatList extends React.Component {
     }
 
     loadChats = () => {
-        this.setState({ error: false });
-        fetch(API_URL).
-            then(res => res.json()).
-            then(result => {
-                let count = 0;
-                for (const item of result) {
-                    if (item.description) { this.props.addChat(item.description); count++; }
-                    if (count == 3) break;
-                }
-            }).
-            catch(err => { console.log(err); this.setState({ error: true }); });
+        if (this.props.chats.length == 0) {
+            this.setState({ error: false });
+            fetch(API_URL).
+                then(res => res.json()).
+                then(result => {
+                    let count = 0;
+                    for (const item of result) {
+                        if (item.description) { this.props.addChat(item.description); count++; }
+                        if (count == 3) break;
+                    }
+                }).
+                catch(err => { console.log(err); this.setState({ error: true }); });
+        }
     }
 
     componentDidMount() {
