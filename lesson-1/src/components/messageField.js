@@ -69,18 +69,11 @@ export class MessageField extends React.Component {
         const obj = document.getElementById("scrollDiv");
         obj.scrollTop = obj.scrollHeight;
         this.input.current.focus();
+    }
 
-        const { chatId } = this.props;
-
-        if (!this.state.updating) {
-            const chat = this.props.chats.find(c => c.id == chatId);
-            if (chat.messages.length > 0 && chat.messages[chat.messages.length - 1].flag == 0) {
-                this.state.updating = true;
-                setTimeout(() => {
-                    this.saveMessage(chatId, "Received!", "Bot", 1);
-                    this.state.updating = false;
-                }, 1000);
-            }
-        }
+    componentDidMount() {
+        const obj = document.getElementById("scrollDiv");
+        obj.scrollTop = obj.scrollHeight;
+        this.input.current.focus();
     }
 }

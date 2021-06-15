@@ -19,6 +19,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, "dist"),
+        publicPath: '/'
     },
     optimization: isDevelopment ? {} : { minimize: true, minimizer: [new OptimizeCssAssetsWebpackPlugin()] },
     plugins: [

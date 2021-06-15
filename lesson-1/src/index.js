@@ -2,10 +2,11 @@ import React from "react"
 import ReactDOM from "react-dom"
 import { BrowserRouter, Switch, Route, useParams, withRouter } from "react-router-dom";
 import { Provider, connect } from "react-redux";
-import { store, mapStateToProps, mapDispatchToProps } from "./store";
-import { MessageField, ChatList } from "./components";
+import { store, mapStateToProps, mapDispatchToProps, persistor } from "./store";
+import { ChatListContainer, MessageField, ChatList } from "./components";
+import { PersistGate } from "redux-persist/integration/react";
 
-const ChatListContainer = withRouter(connect(mapStateToProps, mapDispatchToProps)(ChatList));
+const ChatListContainer2 = withRouter(connect(mapStateToProps, mapDispatchToProps)(ChatListContainer));
 const MessageFieldContainer = connect(mapStateToProps, mapDispatchToProps)(MessageField);
 
 class Header extends React.Component {
@@ -23,11 +24,11 @@ class Layout extends React.Component {
                     <Route path="/chats/:chatId" component={
                         () => {
                             const { chatId } = useParams();
-                            return <React.Fragment><ChatListContainer chatId={chatId} /><MessageFieldContainer chatId={chatId} /></React.Fragment>;
+                            return <React.Fragment><ChatListContainer2 chatId={chatId} /><MessageFieldContainer chatId={chatId} /></React.Fragment>;
                         }
                     } />
                     <Route>
-                        <ChatListContainer chatId="-1" />
+                        <ChatListContainer2 chatId="-1" />
                         <div style={{ width: "70%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
                             <h1>Выберите чат.</h1>
                         </div>
@@ -38,4 +39,4 @@ class Layout extends React.Component {
     }
 }
 
-ReactDOM.render(<BrowserRouter><Provider store={store}><Layout /></Provider></BrowserRouter>, document.getElementById("root"))
+ReactDOM.render(<BrowserRouter><Provider store={store}><PersistGate persistor={persistor}><Layout /></PersistGate></Provider></BrowserRouter>, document.getElementById("root"))
